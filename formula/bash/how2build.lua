@@ -28,13 +28,15 @@ local function builder()
             'armv7',
             'arm64',
         }
-        b.cflags = ' -Wno-implicit-function-declaration'
-    else
-        b.cflags = ''
     end
+    b.defines = {
+        HAVE_CONFIG_H = true,
+        SHELL = true,
+        MACOSX = true,
+    }
     b.compiler = 'clang'
     b.build_dir = 'aite_build'
-    b.cflags = b._cflags..' -g -O2 -Wno-parentheses -Wno-format-security'
+    b.cflags = '-Wno-implicit-function-declaration -g -O2 -Wno-parentheses -Wno-format-security -mios-version-min=7.0'
     function b:ar(obj)
         print(YELLOW('---> ')..GREEN(self.build_dir..'/'..self.output))
         os.execute('ar cr '..self.build_dir..'/'..self.output..' '..table.concat(obj, ' '))
@@ -49,7 +51,7 @@ local localedir = prefix..'/share/locale'
 
 function intl()
     local b = builder()
-    b.defines = {
+    b.defines = table.merge(b.defines, {
         LOCALEDIR = '"'..localedir..'"',
         LOCALE_ALIAS_PATH = '"'..localedir..'"',
         LIBDIR = '"/usr/local/libdata"',
@@ -61,9 +63,7 @@ function intl()
         set_relocation_prefix = 'libitnl_set_relocation_prefix',
         relocate = 'libitnl_relocate',
         DEPENDS_ON_LIBICONV = 1,
-        HAVE_CONFIG_H = true,
-        SHELL = true,
-    }
+    })
     b.include_dirs = {
         'bash-4.4/lib/intl',
         'bash-4.4',
@@ -76,9 +76,6 @@ end
 
 function termcap()
     local b = builder()
-    b.defines = {
-        HAVE_CONFIG_H = true,
-    }
     b.include_dirs = {
         'bash-4.4/lib/termcap',
         'bash-4.4',
@@ -90,11 +87,6 @@ end
 
 function readline()
     local b = builder()
-    b.defines = {
-        MACOSX = true,
-        HAVE_CONFIG_H = true,
-        SHELL = true
-    }
     b.include_dirs = {
         'bash-4.4/lib/readline',
         'bash-4.4/lib/termcap',
@@ -112,7 +104,7 @@ end
 
 function bash()
     local b = builder()
-    b.defines = {
+    b.defines = table.merge(b.defines, {
         PROGRAM = '"bash"',
         CONF_HOSTTYPE = '"x86_64"',
         CONF_OSTYPE = '"darwin15.6.0"',
@@ -120,10 +112,7 @@ function bash()
         CONF_VENDOR = '"apple"',
         LOCALEDIR = '"/usr/local/share/locale"',
         PACKAGE = '"bash"',
-        SHELL = true,
-        HAVE_CONFIG_H = true,
-        MACOSX = true,
-    }
+    })
     b.include_dirs = {
         'bash-4.4',
         'bash-4.4/include',
@@ -138,10 +127,6 @@ end
 
 function builtins()
     local b = builder()
-    b.defines = {
-        HAVE_CONFIG_H = true,
-        SHELL = true,
-    }
     b.include_dirs = {
         'bash-4.4/builtins',
         'bash-4.4',
@@ -163,11 +148,6 @@ end
 
 function glob()
     local b = builder()
-    b.defines = {
-        HAVE_CONFIG_H = true,
-        SHELL = true,
-        MACOSX = true,
-    }
     b.include_dirs = {
         'bash-4.4/lib/glob',
         'bash-4.4',
@@ -183,11 +163,6 @@ end
 
 function sh()
     local b = builder()
-    b.defines = {
-        HAVE_CONFIG_H = true,
-        SHELL = true,
-        MACOSX = true,
-    }
     b.include_dirs = {
         'bash-4.4/lib/sh',
         'bash-4.4',
@@ -202,11 +177,6 @@ end
 
 function tilde()
     local b = builder()
-    b.defines = {
-        HAVE_CONFIG_H = true,
-        SHELL = true,
-        MACOSX = true,
-    }
     b.include_dirs = {
         'bash-4.4/lib/tilde',
         'bash-4.4',
@@ -260,8 +230,8 @@ end
 function link()
     local b = builder()
     print(CYAN('linking *slightly gags again*'))
-    os.pexecute('clang -isysroot "'..b.sdk_path..'" -arch armv7 -arch arm64 '..b.build_dir..'/*.a -liconv -o '..b.build_dir..'/bash')
-    os.pexecute('ldid -S '..b.build_dir..'/bash')
+    assert(os.pexecute('clang -isysroot "'..b.sdk_path..'" -arch armv7 -arch arm64 -mios-version-min=7.0 '..b.build_dir..'/*.a -liconv -o '..b.build_dir..'/bash') == 0, 'linking failed')
+    assert(os.pexecute('ldid -S '..b.build_dir..'/bash') == 0, 'signing failed')
 end
 
 function clean()
