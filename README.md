@@ -11,10 +11,11 @@ The choice of GNU bash mostly comes from its difficulty to port to other platfor
 * Be on a Mac (sorry)
 * Install the Xcode toolchain
 * Install LuaJIT (Either run `brew install luajit`, or, if you don't have homebrew, download [the LuaJIT source](http://luajit.org/download.html) and install it using [these instructions](http://luajit.org/install.html))
-* Install [aite](https://github.com/rweichler/aite)
-* `cd formula/bash`
-* `aite update`
-* `aite`
+* `git clone https://github.com/rweichler/aite`
+* `git clone https://github.com/rweichler/neotelesphoreo`
+* `cd neotelesphoreo/formula/bash`
+* `luajit ../../../aite/main.lua update`
+* `luajit ../../../aite/main.lua`
 
 
 # Resources
