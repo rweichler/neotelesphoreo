@@ -1,0 +1,15 @@
+this is currently a WIP and doesnt work.
+should be easy to do, i just got bored and stopped.
+
+i initially started doing this because coolstar
+kept xz support in his port and i wanted to counter him,
+but i realized that i was being stupid... so i stopped lol
+
+basically clone this repo:
+
+https://salsa.debian.org/dpkg-team/dpkg.git
+
+and then replace configure.ac with the other one, then do configure, make.
+and theoretically you should just be able to run aite but im not done yet
+so you gotta do the rest of the porting, refer to build_log.txt and basically
+translate that to aite stuff.
